@@ -31,22 +31,46 @@ public class RabbitMQConfiguration {
 
     @Bean
     public Queue criarFilaPropostaPendenteMsAnaliseCredito() {
-        return QueueBuilder.durable("proposta-pendente.ms-analise-credito").build();
+        return QueueBuilder.durable("proposta-pendente.ms-analise-credito")
+                .deadLetterExchange("proposta-pendente-dlx.ex")
+                .maxPriority(10)
+                .build();
+    }
+
+    @Bean
+    public Queue criarFilaPropostaPendenteDlq() {
+        return QueueBuilder.durable("proposta-pendente.dlq").build();
+    }
+
+    @Bean
+    public FanoutExchange deadLetterExchange() {
+        return ExchangeBuilder.fanoutExchange("proposta-pendente-dlx.ex").build();
+    }
+
+    @Bean
+    public Binding criarBinding(){
+        return BindingBuilder.bind(criarFilaPropostaPendenteDlq()).to(deadLetterExchange());
     }
 
     @Bean
     public Queue criarFilaPropostaPendenteMsNotificacao() {
-        return QueueBuilder.durable("proposta-pendente.ms-notificacao").build();
+        return QueueBuilder.durable("proposta-pendente.ms-notificacao")
+        .deadLetterExchange("proposta-pendente-dlx.ex")
+        .build();
     }
 
     @Bean
     public Queue criarFilaPropostaConcluidaMsProposta() {
-        return QueueBuilder.durable("proposta-concluida.ms-proposta").build();
+        return QueueBuilder.durable("proposta-concluida.ms-proposta")
+        .deadLetterExchange("proposta-pendente-dlx.ex")
+        .build();
     }
 
     @Bean
     public Queue criarFilaPropostaConcluidaMsNotificacao() {
-        return QueueBuilder.durable("proposta-concluida.ms-notificacao").build();
+        return QueueBuilder.durable("proposta-concluida.ms-notificacao")
+        .deadLetterExchange("proposta-pendente-dlx.ex")
+        .build();
     }
 
     @Bean
